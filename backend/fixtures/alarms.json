@@ -1,0 +1,84 @@
+{
+  "metricAlarms": [
+    {
+      "alarmName": "payment-processor-error-rate",
+      "alarmArn": "arn:aws:cloudwatch:us-east-1:123456789012:alarm:payment-processor-error-rate",
+      "alarmDescription": "Error rate > 5% for payment-processor-lambda",
+      "stateValue": "OK",
+      "metricName": "Errors",
+      "namespace": "AWS/Lambda",
+      "dimensions": [
+        { "name": "FunctionName", "value": "payment-processor-lambda" }
+      ],
+      "threshold": 5.0,
+      "comparisonOperator": "GreaterThanThreshold",
+      "evaluationPeriods": 2,
+      "actionsEnabled": true,
+      "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:payments-pagerduty"]
+    },
+    {
+      "alarmName": "payment-processor-duration-p99",
+      "alarmArn": "arn:aws:cloudwatch:us-east-1:123456789012:alarm:payment-processor-duration-p99",
+      "alarmDescription": "p99 duration > 20s for payment-processor-lambda",
+      "stateValue": "OK",
+      "metricName": "Duration",
+      "namespace": "AWS/Lambda",
+      "dimensions": [
+        { "name": "FunctionName", "value": "payment-processor-lambda" }
+      ],
+      "threshold": 20000,
+      "comparisonOperator": "GreaterThanThreshold",
+      "evaluationPeriods": 3,
+      "actionsEnabled": true,
+      "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:payments-pagerduty"]
+    },
+    {
+      "alarmName": "checkout-api-5xx-rate",
+      "alarmArn": "arn:aws:cloudwatch:us-east-1:123456789012:alarm:checkout-api-5xx-rate",
+      "alarmDescription": "5xx rate > 1% on checkout-api",
+      "stateValue": "OK",
+      "metricName": "5XXError",
+      "namespace": "AWS/ApiGateway",
+      "dimensions": [
+        { "name": "ApiName", "value": "checkout-api" }
+      ],
+      "threshold": 1.0,
+      "comparisonOperator": "GreaterThanThreshold",
+      "evaluationPeriods": 1,
+      "actionsEnabled": true,
+      "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:checkout-pagerduty"]
+    },
+    {
+      "alarmName": "payments-rds-cpu",
+      "alarmArn": "arn:aws:cloudwatch:us-east-1:123456789012:alarm:payments-rds-cpu",
+      "alarmDescription": "RDS CPU > 80%",
+      "stateValue": "OK",
+      "metricName": "CPUUtilization",
+      "namespace": "AWS/RDS",
+      "dimensions": [
+        { "name": "DBInstanceIdentifier", "value": "payments-rds" }
+      ],
+      "threshold": 80.0,
+      "comparisonOperator": "GreaterThanThreshold",
+      "evaluationPeriods": 3,
+      "actionsEnabled": true,
+      "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:payments-pagerduty"]
+    },
+    {
+      "alarmName": "fraud-detection-errors",
+      "alarmArn": "arn:aws:cloudwatch:us-east-1:123456789012:alarm:fraud-detection-errors",
+      "alarmDescription": "Error count > 10 for fraud-detection-service",
+      "stateValue": "OK",
+      "metricName": "Errors",
+      "namespace": "AWS/Lambda",
+      "dimensions": [
+        { "name": "FunctionName", "value": "fraud-detection-service" }
+      ],
+      "threshold": 10,
+      "comparisonOperator": "GreaterThanThreshold",
+      "evaluationPeriods": 1,
+      "actionsEnabled": true,
+      "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:risk-pagerduty"]
+    }
+  ]
+}

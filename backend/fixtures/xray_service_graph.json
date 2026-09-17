@@ -1,0 +1,162 @@
+{
+  "serviceGraph": {
+    "startTime": "2026-09-10T00:00:00Z",
+    "endTime": "2026-09-17T00:00:00Z",
+    "services": [
+      {
+        "referenceId": 1,
+        "name": "checkout-api",
+        "type": "AWS::ApiGateway::Stage",
+        "state": "active",
+        "summaryStatistics": {
+          "totalCount": 48203,
+          "errorStatistics": { "totalCount": 142 },
+          "faultStatistics": { "totalCount": 12 }
+        },
+        "edges": [
+          {
+            "referenceId": 2,
+            "summaryStatistics": {
+              "totalCount": 48203,
+              "responseTimeHistogram": [{ "value": 0.12, "count": 48203 }]
+            }
+          }
+        ]
+      },
+      {
+        "referenceId": 2,
+        "name": "checkout-service-lambda",
+        "type": "AWS::Lambda::Function",
+        "arn": "arn:aws:lambda:us-east-1:123456789012:function:checkout-service-lambda",
+        "state": "active",
+        "summaryStatistics": {
+          "totalCount": 48203,
+          "errorStatistics": { "totalCount": 98 }
+        },
+        "edges": [
+          {
+            "referenceId": 3,
+            "summaryStatistics": {
+              "totalCount": 48203,
+              "responseTimeHistogram": [{ "value": 0.08, "count": 48203 }]
+            }
+          },
+          {
+            "referenceId": 7,
+            "summaryStatistics": {
+              "totalCount": 48203,
+              "responseTimeHistogram": [{ "value": 0.004, "count": 48203 }]
+            }
+          }
+        ]
+      },
+      {
+        "referenceId": 3,
+        "name": "payment-processor-lambda",
+        "type": "AWS::Lambda::Function",
+        "arn": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda",
+        "state": "active",
+        "summaryStatistics": {
+          "totalCount": 48203,
+          "errorStatistics": { "totalCount": 34 }
+        },
+        "edges": [
+          {
+            "referenceId": 4,
+            "summaryStatistics": {
+              "totalCount": 48203,
+              "responseTimeHistogram": [{ "value": 0.02, "count": 48203 }]
+            }
+          },
+          {
+            "referenceId": 5,
+            "summaryStatistics": {
+              "totalCount": 48203,
+              "responseTimeHistogram": [{ "value": 0.015, "count": 48203 }]
+            }
+          }
+        ]
+      },
+      {
+        "referenceId": 4,
+        "name": "payments-rds",
+        "type": "AWS::RDS::DBInstance",
+        "arn": "arn:aws:rds:us-east-1:123456789012:db:payments-rds",
+        "state": "active",
+        "summaryStatistics": { "totalCount": 48203 },
+        "edges": []
+      },
+      {
+        "referenceId": 5,
+        "name": "payment-events-queue",
+        "type": "AWS::SQS::Queue",
+        "arn": "arn:aws:sqs:us-east-1:123456789012:queue:payment-events-queue",
+        "state": "active",
+        "summaryStatistics": { "totalCount": 48203 },
+        "edges": [
+          {
+            "referenceId": 6,
+            "summaryStatistics": {
+              "totalCount": 48203,
+              "responseTimeHistogram": [{ "value": 0.005, "count": 48203 }]
+            }
+          }
+        ]
+      },
+      {
+        "referenceId": 6,
+        "name": "notification-service-lambda",
+        "type": "AWS::Lambda::Function",
+        "arn": "arn:aws:lambda:us-east-1:123456789012:function:notification-service-lambda",
+        "state": "active",
+        "summaryStatistics": { "totalCount": 48203 },
+        "edges": []
+      },
+      {
+        "referenceId": 7,
+        "name": "cart-table",
+        "type": "AWS::DynamoDB::Table",
+        "arn": "arn:aws:dynamodb:us-east-1:123456789012:table:cart-table",
+        "state": "active",
+        "summaryStatistics": { "totalCount": 48203 },
+        "edges": []
+      },
+      {
+        "referenceId": 8,
+        "name": "fraud-detection-service",
+        "type": "AWS::Lambda::Function",
+        "arn": "arn:aws:lambda:us-east-1:123456789012:function:fraud-detection-service",
+        "state": "active",
+        "summaryStatistics": {
+          "totalCount": 5929,
+          "errorStatistics": { "totalCount": 8 }
+        },
+        "edges": [
+          {
+            "referenceId": 3,
+            "summaryStatistics": {
+              "totalCount": 5929,
+              "responseTimeHistogram": [{ "value": 0.09, "count": 5929 }]
+            }
+          },
+          {
+            "referenceId": 9,
+            "summaryStatistics": {
+              "totalCount": 5929,
+              "responseTimeHistogram": [{ "value": 0.003, "count": 5929 }]
+            }
+          }
+        ]
+      },
+      {
+        "referenceId": 9,
+        "name": "fraud-patterns-table",
+        "type": "AWS::DynamoDB::Table",
+        "arn": "arn:aws:dynamodb:us-east-1:123456789012:table:fraud-patterns-table",
+        "state": "active",
+        "summaryStatistics": { "totalCount": 5929 },
+        "edges": []
+      }
+    ]
+  }
+}

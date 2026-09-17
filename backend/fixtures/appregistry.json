@@ -1,0 +1,36 @@
+{
+  "applications": [
+    {
+      "id": "app-checkout",
+      "name": "checkout-app",
+      "description": "Customer checkout flow — cart to payment confirmation",
+      "associatedResources": [
+        "arn:aws:apigateway:us-east-1:123456789012:restapi:checkout-api",
+        "arn:aws:lambda:us-east-1:123456789012:function:checkout-service-lambda",
+        "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda",
+        "arn:aws:dynamodb:us-east-1:123456789012:table:cart-table"
+      ],
+      "tags": { "team": "payments-team", "env": "prod", "customer-facing": "true" }
+    },
+    {
+      "id": "app-notifications",
+      "name": "notification-app",
+      "description": "Post-purchase email and SMS notifications",
+      "associatedResources": [
+        "arn:aws:lambda:us-east-1:123456789012:function:notification-service-lambda",
+        "arn:aws:sqs:us-east-1:123456789012:queue:payment-events-queue"
+      ],
+      "tags": { "team": "platform-team", "env": "prod", "customer-facing": "false" }
+    },
+    {
+      "id": "app-data",
+      "name": "payments-data-app",
+      "description": "Persistent payments data store",
+      "associatedResources": [
+        "arn:aws:rds:us-east-1:123456789012:db:payments-rds",
+        "arn:aws:secretsmanager:us-east-1:123456789012:secret:payment-db-secret"
+      ],
+      "tags": { "team": "payments-team", "env": "prod", "customer-facing": "false" }
+    }
+  ]
+}

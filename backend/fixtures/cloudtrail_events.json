@@ -1,0 +1,98 @@
+{
+  "events": [
+    {
+      "eventId": "evt-001",
+      "eventName": "UpdateFunctionConfiguration",
+      "eventTime": "2026-09-15T14:23:11Z",
+      "username": "priya.sharma",
+      "sourceIPAddress": "10.0.1.55",
+      "userAgent": "aws-cli/2.13.0",
+      "requestParameters": {
+        "functionName": "payment-processor-lambda",
+        "memorySize": 512
+      },
+      "responseElements": {
+        "functionName": "payment-processor-lambda",
+        "memorySize": 512
+      },
+      "resources": [
+        { "ARN": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda", "type": "AWS::Lambda::Function" }
+      ]
+    },
+    {
+      "eventId": "evt-002",
+      "eventName": "Invoke",
+      "eventTime": "2026-09-17T08:01:02Z",
+      "username": "fraud-detection-service",
+      "sourceIPAddress": "lambda.amazonaws.com",
+      "userAgent": "lambda",
+      "requestParameters": {
+        "functionName": "payment-processor-lambda",
+        "invocationType": "RequestResponse"
+      },
+      "resources": [
+        { "ARN": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda", "type": "AWS::Lambda::Function" }
+      ],
+      "invokeCount": 847
+    },
+    {
+      "eventId": "evt-003",
+      "eventName": "Invoke",
+      "eventTime": "2026-09-17T08:01:05Z",
+      "username": "checkout-service-lambda",
+      "sourceIPAddress": "lambda.amazonaws.com",
+      "userAgent": "lambda",
+      "requestParameters": {
+        "functionName": "payment-processor-lambda",
+        "invocationType": "RequestResponse"
+      },
+      "resources": [
+        { "ARN": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda", "type": "AWS::Lambda::Function" }
+      ],
+      "invokeCount": 48203
+    },
+    {
+      "eventId": "evt-004",
+      "eventName": "DeleteFunction",
+      "eventTime": "2025-11-03T22:14:00Z",
+      "username": "ravi.kumar",
+      "sourceIPAddress": "10.0.2.11",
+      "userAgent": "aws-cli/2.10.0",
+      "requestParameters": {
+        "functionName": "legacy-payment-handler"
+      },
+      "resources": [
+        { "ARN": "arn:aws:lambda:us-east-1:123456789012:function:legacy-payment-handler", "type": "AWS::Lambda::Function" }
+      ]
+    },
+    {
+      "eventId": "evt-005",
+      "eventName": "GetSecretValue",
+      "eventTime": "2026-09-17T08:00:55Z",
+      "username": "payment-processor-lambda",
+      "sourceIPAddress": "lambda.amazonaws.com",
+      "userAgent": "lambda",
+      "requestParameters": {
+        "secretId": "arn:aws:secretsmanager:us-east-1:123456789012:secret:payment-db-secret"
+      },
+      "resources": [
+        { "ARN": "arn:aws:secretsmanager:us-east-1:123456789012:secret:payment-db-secret", "type": "AWS::SecretsManager::Secret" }
+      ],
+      "invokeCount": 48203
+    },
+    {
+      "eventId": "evt-006",
+      "eventName": "UpdateFunctionCode",
+      "eventTime": "2026-09-10T11:05:33Z",
+      "username": "ananya.iyer",
+      "sourceIPAddress": "10.0.1.88",
+      "userAgent": "aws-cli/2.13.0",
+      "requestParameters": {
+        "functionName": "fraud-detection-service"
+      },
+      "resources": [
+        { "ARN": "arn:aws:lambda:us-east-1:123456789012:function:fraud-detection-service", "type": "AWS::Lambda::Function" }
+      ]
+    }
+  ]
+}

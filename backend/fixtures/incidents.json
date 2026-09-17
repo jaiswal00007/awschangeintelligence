@@ -1,0 +1,79 @@
+{
+  "incidents": [
+    {
+      "id": "INC-2043",
+      "date": "2025-11-03T22:14:00Z",
+      "resourceType": "AWS::Lambda::Function",
+      "resourceName": "legacy-payment-handler",
+      "changeType": "delete",
+      "affectedApps": ["checkout-app", "payments-data-app"],
+      "affectedTeams": ["payments-team", "checkout-team"],
+      "outageMinutes": 17,
+      "severity": "P1",
+      "rootCause": "Deleting legacy-payment-handler severed an undocumented dependency from fraud-detection-service. Fraud checks failed open (allowed all transactions) for 17 minutes before rollback via redeployment.",
+      "resolvedBy": "ravi.kumar",
+      "postmortemUrl": "https://wiki.internal/postmortems/INC-2043",
+      "tags": { "env": "prod", "service": "payment-processing" }
+    },
+    {
+      "id": "INC-1987",
+      "date": "2025-08-21T03:45:00Z",
+      "resourceType": "AWS::RDS::DBInstance",
+      "resourceName": "payments-rds",
+      "changeType": "config_change",
+      "affectedApps": ["checkout-app", "payments-data-app"],
+      "affectedTeams": ["payments-team"],
+      "outageMinutes": 8,
+      "severity": "P2",
+      "rootCause": "Parameter group change (max_connections reduced) caused connection exhaustion under peak load.",
+      "resolvedBy": "priya.sharma",
+      "postmortemUrl": "https://wiki.internal/postmortems/INC-1987",
+      "tags": { "env": "prod", "service": "payment-processing" }
+    },
+    {
+      "id": "INC-1834",
+      "date": "2025-06-14T16:22:00Z",
+      "resourceType": "AWS::Lambda::Function",
+      "resourceName": "checkout-service-lambda",
+      "changeType": "downsize",
+      "affectedApps": ["checkout-app"],
+      "affectedTeams": ["checkout-team"],
+      "outageMinutes": 4,
+      "severity": "P2",
+      "rootCause": "Memory reduction from 1024MB to 256MB caused OOM errors under concurrent checkout load during flash sale.",
+      "resolvedBy": "ananya.iyer",
+      "postmortemUrl": "https://wiki.internal/postmortems/INC-1834",
+      "tags": { "env": "prod", "service": "checkout" }
+    },
+    {
+      "id": "INC-1701",
+      "date": "2025-04-02T09:11:00Z",
+      "resourceType": "AWS::SQS::Queue",
+      "resourceName": "payment-events-queue",
+      "changeType": "config_change",
+      "affectedApps": ["notification-app"],
+      "affectedTeams": ["platform-team"],
+      "outageMinutes": 45,
+      "severity": "P3",
+      "rootCause": "Visibility timeout reduced to 10s caused duplicate message processing and notification floods.",
+      "resolvedBy": "dev.ops",
+      "postmortemUrl": "https://wiki.internal/postmortems/INC-1701",
+      "tags": { "env": "prod", "service": "eventing" }
+    },
+    {
+      "id": "INC-1622",
+      "date": "2025-02-18T11:30:00Z",
+      "resourceType": "AWS::Lambda::Function",
+      "resourceName": "fraud-detection-service",
+      "changeType": "config_change",
+      "affectedApps": ["checkout-app"],
+      "affectedTeams": ["risk-team", "payments-team"],
+      "outageMinutes": 0,
+      "severity": "P3",
+      "rootCause": "Timeout increase from 30s to 60s caused checkout latency spike — fraud check is synchronous in the payment flow. No outage but SLA breach.",
+      "resolvedBy": "ananya.iyer",
+      "postmortemUrl": "https://wiki.internal/postmortems/INC-1622",
+      "tags": { "env": "prod", "service": "fraud-detection" }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "resourceTagMappingList": [
+    {
+      "resourceARN": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda",
+      "tags": {
+        "env": "prod",
+        "team": "payments-team",
+        "criticality": "medium",
+        "service": "payment-processing",
+        "cost-center": "CC-4421",
+        "customer-facing": "false"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:lambda:us-east-1:123456789012:function:checkout-service-lambda",
+      "tags": {
+        "env": "prod",
+        "team": "checkout-team",
+        "criticality": "high",
+        "service": "checkout",
+        "customer-facing": "true"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:lambda:us-east-1:123456789012:function:fraud-detection-service",
+      "tags": {
+        "env": "prod",
+        "team": "risk-team",
+        "criticality": "high",
+        "service": "fraud-detection",
+        "customer-facing": "false"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:apigateway:us-east-1:123456789012:restapi:checkout-api",
+      "tags": {
+        "env": "prod",
+        "team": "checkout-team",
+        "criticality": "critical",
+        "service": "checkout",
+        "customer-facing": "true"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:rds:us-east-1:123456789012:db:payments-rds",
+      "tags": {
+        "env": "prod",
+        "team": "payments-team",
+        "criticality": "critical",
+        "service": "payment-processing",
+        "customer-facing": "false",
+        "backup": "daily"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:sqs:us-east-1:123456789012:queue:payment-events-queue",
+      "tags": {
+        "env": "prod",
+        "team": "platform-team",
+        "criticality": "medium",
+        "service": "eventing",
+        "customer-facing": "false"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:dynamodb:us-east-1:123456789012:table:cart-table",
+      "tags": {
+        "env": "prod",
+        "team": "checkout-team",
+        "criticality": "high",
+        "service": "checkout",
+        "customer-facing": "false"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:dynamodb:us-east-1:123456789012:table:fraud-patterns-table",
+      "tags": {
+        "env": "prod",
+        "team": "risk-team",
+        "criticality": "high",
+        "service": "fraud-detection",
+        "customer-facing": "false"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:lambda:us-east-1:123456789012:function:notification-service-lambda",
+      "tags": {
+        "env": "prod",
+        "team": "platform-team",
+        "criticality": "low",
+        "service": "notifications",
+        "customer-facing": "true"
+      }
+    },
+    {
+      "resourceARN": "arn:aws:secretsmanager:us-east-1:123456789012:secret:payment-db-secret",
+      "tags": {
+        "env": "prod",
+        "team": "payments-team",
+        "criticality": "critical",
+        "service": "payment-processing",
+        "customer-facing": "false"
+      }
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "resources": [
+    {
+      "id": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda",
+      "type": "AWS::Lambda::Function",
+      "name": "payment-processor-lambda",
+      "region": "us-east-1",
+      "configuration": {
+        "functionName": "payment-processor-lambda",
+        "runtime": "python3.11",
+        "memorySize": 1024,
+        "timeout": 30,
+        "handler": "handler.process_payment"
+      },
+      "relationships": [
+        {
+          "resourceId": "arn:aws:sqs:us-east-1:123456789012:queue:payment-events-queue",
+          "resourceType": "AWS::SQS::Queue",
+          "relationshipName": "Is triggered by EventSourceMapping"
+        },
+        {
+          "resourceId": "arn:aws:rds:us-east-1:123456789012:db:payments-rds",
+          "resourceType": "AWS::RDS::DBInstance",
+          "relationshipName": "Is associated with"
+        },
+        {
+          "resourceId": "arn:aws:secretsmanager:us-east-1:123456789012:secret:payment-db-secret",
+          "resourceType": "AWS::SecretsManager::Secret",
+          "relationshipName": "Is associated with"
+        }
+      ]
+    },
+    {
+      "id": "arn:aws:lambda:us-east-1:123456789012:function:checkout-service-lambda",
+      "type": "AWS::Lambda::Function",
+      "name": "checkout-service-lambda",
+      "region": "us-east-1",
+      "configuration": {
+        "functionName": "checkout-service-lambda",
+        "runtime": "nodejs18.x",
+        "memorySize": 512,
+        "timeout": 15,
+        "handler": "index.handler"
+      },
+      "relationships": [
+        {
+          "resourceId": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda",
+          "resourceType": "AWS::Lambda::Function",
+          "relationshipName": "Is associated with"
+        },
+        {
+          "resourceId": "arn:aws:dynamodb:us-east-1:123456789012:table:cart-table",
+          "resourceType": "AWS::DynamoDB::Table",
+          "relationshipName": "Is associated with"
+        }
+      ]
+    },
+    {
+      "id": "arn:aws:lambda:us-east-1:123456789012:function:fraud-detection-service",
+      "type": "AWS::Lambda::Function",
+      "name": "fraud-detection-service",
+      "region": "us-east-1",
+      "configuration": {
+        "functionName": "fraud-detection-service",
+        "runtime": "python3.11",
+        "memorySize": 2048,
+        "timeout": 60,
+        "handler": "fraud.detect"
+      },
+      "relationships": [
+        {
+          "resourceId": "arn:aws:dynamodb:us-east-1:123456789012:table:fraud-patterns-table",
+          "resourceType": "AWS::DynamoDB::Table",
+          "relationshipName": "Is associated with"
+        }
+      ]
+    },
+    {
+      "id": "arn:aws:apigateway:us-east-1:123456789012:restapi:checkout-api",
+      "type": "AWS::ApiGateway::RestApi",
+      "name": "checkout-api",
+      "region": "us-east-1",
+      "configuration": {
+        "name": "checkout-api",
+        "endpointType": "REGIONAL"
+      },
+      "relationships": [
+        {
+          "resourceId": "arn:aws:lambda:us-east-1:123456789012:function:checkout-service-lambda",
+          "resourceType": "AWS::Lambda::Function",
+          "relationshipName": "Is associated with"
+        }
+      ]
+    },
+    {
+      "id": "arn:aws:rds:us-east-1:123456789012:db:payments-rds",
+      "type": "AWS::RDS::DBInstance",
+      "name": "payments-rds",
+      "region": "us-east-1",
+      "configuration": {
+        "dbInstanceIdentifier": "payments-rds",
+        "dbInstanceClass": "db.t3.medium",
+        "engine": "postgres",
+        "engineVersion": "14.7",
+        "multiAZ": true
+      },
+      "relationships": [
+        {
+          "resourceId": "arn:aws:ec2:us-east-1:123456789012:security-group:sg-payments-rds",
+          "resourceType": "AWS::EC2::SecurityGroup",
+          "relationshipName": "Is associated with"
+        }
+      ]
+    },
+    {
+      "id": "arn:aws:sqs:us-east-1:123456789012:queue:payment-events-queue",
+      "type": "AWS::SQS::Queue",
+      "name": "payment-events-queue",
+      "region": "us-east-1",
+      "configuration": {
+        "queueName": "payment-events-queue",
+        "visibilityTimeout": 60,
+        "messageRetentionPeriod": 86400
+      },
+      "relationships": []
+    },
+    {
+      "id": "arn:aws:dynamodb:us-east-1:123456789012:table:cart-table",
+      "type": "AWS::DynamoDB::Table",
+      "name": "cart-table",
+      "region": "us-east-1",
+      "configuration": {
+        "tableName": "cart-table",
+        "billingMode": "PAY_PER_REQUEST"
+      },
+      "relationships": []
+    },
+    {
+      "id": "arn:aws:dynamodb:us-east-1:123456789012:table:fraud-patterns-table",
+      "type": "AWS::DynamoDB::Table",
+      "name": "fraud-patterns-table",
+      "region": "us-east-1",
+      "configuration": {
+        "tableName": "fraud-patterns-table",
+        "billingMode": "PAY_PER_REQUEST"
+      },
+      "relationships": []
+    },
+    {
+      "id": "arn:aws:secretsmanager:us-east-1:123456789012:secret:payment-db-secret",
+      "type": "AWS::SecretsManager::Secret",
+      "name": "payment-db-secret",
+      "region": "us-east-1",
+      "configuration": {},
+      "relationships": []
+    },
+    {
+      "id": "arn:aws:lambda:us-east-1:123456789012:function:notification-service-lambda",
+      "type": "AWS::Lambda::Function",
+      "name": "notification-service-lambda",
+      "region": "us-east-1",
+      "configuration": {
+        "functionName": "notification-service-lambda",
+        "runtime": "nodejs18.x",
+        "memorySize": 256,
+        "timeout": 10
+      },
+      "relationships": [
+        {
+          "resourceId": "arn:aws:sqs:us-east-1:123456789012:queue:payment-events-queue",
+          "resourceType": "AWS::SQS::Queue",
+          "relationshipName": "Is triggered by EventSourceMapping"
+        }
+      ]
+    }
+  ]
+}
