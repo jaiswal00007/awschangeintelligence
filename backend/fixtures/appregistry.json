@@ -10,7 +10,7 @@
         "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda",
         "arn:aws:dynamodb:us-east-1:123456789012:table:cart-table"
       ],
-      "tags": { "team": "payments-team", "env": "prod", "customer-facing": "true" }
+      "tags": { "team": "checkout-team", "env": "prod", "customer-facing": "true" }
     },
     {
       "id": "app-notifications",
@@ -20,10 +20,10 @@
         "arn:aws:lambda:us-east-1:123456789012:function:notification-service-lambda",
         "arn:aws:sqs:us-east-1:123456789012:queue:payment-events-queue"
       ],
-      "tags": { "team": "platform-team", "env": "prod", "customer-facing": "false" }
+      "tags": { "team": "platform-team", "env": "prod", "customer-facing": "true" }
     },
     {
-      "id": "app-data",
+      "id": "app-payments-data",
       "name": "payments-data-app",
       "description": "Persistent payments data store",
       "associatedResources": [

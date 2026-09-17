@@ -38,7 +38,7 @@
       "configuration": {
         "functionName": "checkout-service-lambda",
         "runtime": "nodejs18.x",
-        "memorySize": 512,
+        "memorySize": 1024,
         "timeout": 15,
         "handler": "index.handler"
       },
@@ -80,10 +80,7 @@
       "type": "AWS::ApiGateway::RestApi",
       "name": "checkout-api",
       "region": "us-east-1",
-      "configuration": {
-        "name": "checkout-api",
-        "endpointType": "REGIONAL"
-      },
+      "configuration": { "name": "checkout-api", "endpointType": "REGIONAL" },
       "relationships": [
         {
           "resourceId": "arn:aws:lambda:us-east-1:123456789012:function:checkout-service-lambda",
@@ -102,7 +99,8 @@
         "dbInstanceClass": "db.t3.medium",
         "engine": "postgres",
         "engineVersion": "14.7",
-        "multiAZ": true
+        "multiAZ": true,
+        "maxConnections": 200
       },
       "relationships": [
         {
@@ -129,10 +127,7 @@
       "type": "AWS::DynamoDB::Table",
       "name": "cart-table",
       "region": "us-east-1",
-      "configuration": {
-        "tableName": "cart-table",
-        "billingMode": "PAY_PER_REQUEST"
-      },
+      "configuration": { "tableName": "cart-table", "billingMode": "PAY_PER_REQUEST" },
       "relationships": []
     },
     {
@@ -140,10 +135,7 @@
       "type": "AWS::DynamoDB::Table",
       "name": "fraud-patterns-table",
       "region": "us-east-1",
-      "configuration": {
-        "tableName": "fraud-patterns-table",
-        "billingMode": "PAY_PER_REQUEST"
-      },
+      "configuration": { "tableName": "fraud-patterns-table", "billingMode": "PAY_PER_REQUEST" },
       "relationships": []
     },
     {
@@ -172,6 +164,19 @@
           "relationshipName": "Is triggered by EventSourceMapping"
         }
       ]
+    },
+    {
+      "id": "arn:aws:lambda:us-east-1:123456789012:function:reporting-lambda",
+      "type": "AWS::Lambda::Function",
+      "name": "reporting-lambda",
+      "region": "us-east-1",
+      "configuration": {
+        "functionName": "reporting-lambda",
+        "runtime": "python3.11",
+        "memorySize": 512,
+        "timeout": 120
+      },
+      "relationships": []
     }
   ]
 }

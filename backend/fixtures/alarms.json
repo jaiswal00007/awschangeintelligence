@@ -7,12 +7,8 @@
       "stateValue": "OK",
       "metricName": "Errors",
       "namespace": "AWS/Lambda",
-      "dimensions": [
-        { "name": "FunctionName", "value": "payment-processor-lambda" }
-      ],
+      "dimensions": [{ "name": "FunctionName", "value": "payment-processor-lambda" }],
       "threshold": 5.0,
-      "comparisonOperator": "GreaterThanThreshold",
-      "evaluationPeriods": 2,
       "actionsEnabled": true,
       "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:payments-pagerduty"]
     },
@@ -23,12 +19,8 @@
       "stateValue": "OK",
       "metricName": "Duration",
       "namespace": "AWS/Lambda",
-      "dimensions": [
-        { "name": "FunctionName", "value": "payment-processor-lambda" }
-      ],
+      "dimensions": [{ "name": "FunctionName", "value": "payment-processor-lambda" }],
       "threshold": 20000,
-      "comparisonOperator": "GreaterThanThreshold",
-      "evaluationPeriods": 3,
       "actionsEnabled": true,
       "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:payments-pagerduty"]
     },
@@ -39,12 +31,20 @@
       "stateValue": "OK",
       "metricName": "5XXError",
       "namespace": "AWS/ApiGateway",
-      "dimensions": [
-        { "name": "ApiName", "value": "checkout-api" }
-      ],
+      "dimensions": [{ "name": "ApiName", "value": "checkout-api" }],
       "threshold": 1.0,
-      "comparisonOperator": "GreaterThanThreshold",
-      "evaluationPeriods": 1,
+      "actionsEnabled": true,
+      "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:checkout-pagerduty"]
+    },
+    {
+      "alarmName": "checkout-service-errors",
+      "alarmArn": "arn:aws:cloudwatch:us-east-1:123456789012:alarm:checkout-service-errors",
+      "alarmDescription": "Error count > 50 for checkout-service-lambda",
+      "stateValue": "OK",
+      "metricName": "Errors",
+      "namespace": "AWS/Lambda",
+      "dimensions": [{ "name": "FunctionName", "value": "checkout-service-lambda" }],
+      "threshold": 50,
       "actionsEnabled": true,
       "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:checkout-pagerduty"]
     },
@@ -55,12 +55,20 @@
       "stateValue": "OK",
       "metricName": "CPUUtilization",
       "namespace": "AWS/RDS",
-      "dimensions": [
-        { "name": "DBInstanceIdentifier", "value": "payments-rds" }
-      ],
+      "dimensions": [{ "name": "DBInstanceIdentifier", "value": "payments-rds" }],
       "threshold": 80.0,
-      "comparisonOperator": "GreaterThanThreshold",
-      "evaluationPeriods": 3,
+      "actionsEnabled": true,
+      "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:payments-pagerduty"]
+    },
+    {
+      "alarmName": "payments-rds-connections",
+      "alarmArn": "arn:aws:cloudwatch:us-east-1:123456789012:alarm:payments-rds-connections",
+      "alarmDescription": "DB connections > 180 (90% of max_connections=200)",
+      "stateValue": "OK",
+      "metricName": "DatabaseConnections",
+      "namespace": "AWS/RDS",
+      "dimensions": [{ "name": "DBInstanceIdentifier", "value": "payments-rds" }],
+      "threshold": 180,
       "actionsEnabled": true,
       "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:payments-pagerduty"]
     },
@@ -71,12 +79,8 @@
       "stateValue": "OK",
       "metricName": "Errors",
       "namespace": "AWS/Lambda",
-      "dimensions": [
-        { "name": "FunctionName", "value": "fraud-detection-service" }
-      ],
+      "dimensions": [{ "name": "FunctionName", "value": "fraud-detection-service" }],
       "threshold": 10,
-      "comparisonOperator": "GreaterThanThreshold",
-      "evaluationPeriods": 1,
       "actionsEnabled": true,
       "alarmActions": ["arn:aws:sns:us-east-1:123456789012:topic:risk-pagerduty"]
     }

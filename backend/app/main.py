@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .datasource import MockDataSource
 from .graph_engine import build_graph, blast_radius as compute_blast_radius, get_subgraph
-from .blind_spot import detect_blind_spots
+from .blind_spot import detect_all_blind_spots, detect_blind_spots_for_target
 from .risk_scorer import score as compute_score
 from .incident_matcher import match as match_incidents
 from .bedrock_client import get_verdict
@@ -30,8 +30,7 @@ app.add_middleware(
 
 _ds = MockDataSource(FIXTURES_PATH)
 _graph = build_graph(_ds)
-# Pre-compute blind spots globally (they're structural, not per-request)
-_global_blind_spots = detect_blind_spots(_graph)
+detect_all_blind_spots(_graph)  # mark edges once at startup
 
 
 @app.get("/resources")
@@ -78,12 +77,9 @@ def analyze_change(req: ChangeRequest):
     br_summary = BlastRadiusSummary(**br_result["blast_radius"])
     affected_nodes = [AffectedNode(**n) for n in br_result["affected_nodes"]]
 
-    # Blind spots scoped to affected nodes
+    # Blind spots scoped to this target + its blast radius
     affected_ids = {n.node_id for n in affected_nodes} | {req.target}
-    scoped_blind_spots = [
-        bs for bs in _global_blind_spots
-        if bs["target_id"] in affected_ids or bs["source_id"] in affected_ids
-    ]
+    scoped_blind_spots = detect_blind_spots_for_target(_graph, req.target, affected_ids)
     blind_spot_models = [BlindSpot(**bs) for bs in scoped_blind_spots]
 
     # App names in blast radius for incident matching

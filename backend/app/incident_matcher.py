@@ -13,16 +13,21 @@ def match(
         sim = 0.0
 
         if inc.get("resourceType") == resource_type:
-            sim += 0.5
+            sim += 0.6
 
-        if inc.get("changeType") == change_type:
-            sim += 0.3
+        # change_type already gated above — add bonus for exact resource name match
+        if inc.get("resourceName") and inc.get("resourceName") in resource_type:
+            sim += 0.2
 
         inc_apps = set(inc.get("affectedApps", []))
         cur_apps = set(affected_apps)
         if inc_apps and cur_apps:
             overlap = len(inc_apps & cur_apps) / max(len(inc_apps), len(cur_apps))
             sim += 0.2 * overlap
+
+        # Require both resource type AND change type to match for a result
+        if inc.get("changeType") != change_type:
+            continue
 
         if sim >= 0.5:
             results.append({

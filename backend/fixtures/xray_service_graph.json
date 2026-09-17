@@ -7,20 +7,11 @@
         "referenceId": 1,
         "name": "checkout-api",
         "type": "AWS::ApiGateway::Stage",
+        "arn": "arn:aws:apigateway:us-east-1:123456789012:restapi:checkout-api",
         "state": "active",
-        "summaryStatistics": {
-          "totalCount": 48203,
-          "errorStatistics": { "totalCount": 142 },
-          "faultStatistics": { "totalCount": 12 }
-        },
+        "summaryStatistics": { "totalCount": 48203 },
         "edges": [
-          {
-            "referenceId": 2,
-            "summaryStatistics": {
-              "totalCount": 48203,
-              "responseTimeHistogram": [{ "value": 0.12, "count": 48203 }]
-            }
-          }
+          { "referenceId": 2, "summaryStatistics": { "totalCount": 48203 } }
         ]
       },
       {
@@ -29,25 +20,10 @@
         "type": "AWS::Lambda::Function",
         "arn": "arn:aws:lambda:us-east-1:123456789012:function:checkout-service-lambda",
         "state": "active",
-        "summaryStatistics": {
-          "totalCount": 48203,
-          "errorStatistics": { "totalCount": 98 }
-        },
+        "summaryStatistics": { "totalCount": 48203 },
         "edges": [
-          {
-            "referenceId": 3,
-            "summaryStatistics": {
-              "totalCount": 48203,
-              "responseTimeHistogram": [{ "value": 0.08, "count": 48203 }]
-            }
-          },
-          {
-            "referenceId": 7,
-            "summaryStatistics": {
-              "totalCount": 48203,
-              "responseTimeHistogram": [{ "value": 0.004, "count": 48203 }]
-            }
-          }
+          { "referenceId": 3, "summaryStatistics": { "totalCount": 48203 } },
+          { "referenceId": 7, "summaryStatistics": { "totalCount": 48203 } }
         ]
       },
       {
@@ -56,25 +32,10 @@
         "type": "AWS::Lambda::Function",
         "arn": "arn:aws:lambda:us-east-1:123456789012:function:payment-processor-lambda",
         "state": "active",
-        "summaryStatistics": {
-          "totalCount": 48203,
-          "errorStatistics": { "totalCount": 34 }
-        },
+        "summaryStatistics": { "totalCount": 48203 },
         "edges": [
-          {
-            "referenceId": 4,
-            "summaryStatistics": {
-              "totalCount": 48203,
-              "responseTimeHistogram": [{ "value": 0.02, "count": 48203 }]
-            }
-          },
-          {
-            "referenceId": 5,
-            "summaryStatistics": {
-              "totalCount": 48203,
-              "responseTimeHistogram": [{ "value": 0.015, "count": 48203 }]
-            }
-          }
+          { "referenceId": 4, "summaryStatistics": { "totalCount": 48203 } },
+          { "referenceId": 5, "summaryStatistics": { "totalCount": 48203 } }
         ]
       },
       {
@@ -94,13 +55,7 @@
         "state": "active",
         "summaryStatistics": { "totalCount": 48203 },
         "edges": [
-          {
-            "referenceId": 6,
-            "summaryStatistics": {
-              "totalCount": 48203,
-              "responseTimeHistogram": [{ "value": 0.005, "count": 48203 }]
-            }
-          }
+          { "referenceId": 6, "summaryStatistics": { "totalCount": 48203 } }
         ]
       },
       {
@@ -127,25 +82,13 @@
         "type": "AWS::Lambda::Function",
         "arn": "arn:aws:lambda:us-east-1:123456789012:function:fraud-detection-service",
         "state": "active",
-        "summaryStatistics": {
-          "totalCount": 5929,
-          "errorStatistics": { "totalCount": 8 }
-        },
+        "summaryStatistics": { "totalCount": 5929 },
         "edges": [
           {
             "referenceId": 3,
-            "summaryStatistics": {
-              "totalCount": 5929,
-              "responseTimeHistogram": [{ "value": 0.09, "count": 5929 }]
-            }
+            "summaryStatistics": { "totalCount": 5929 }
           },
-          {
-            "referenceId": 9,
-            "summaryStatistics": {
-              "totalCount": 5929,
-              "responseTimeHistogram": [{ "value": 0.003, "count": 5929 }]
-            }
-          }
+          { "referenceId": 9, "summaryStatistics": { "totalCount": 5929 } }
         ]
       },
       {
@@ -156,6 +99,20 @@
         "state": "active",
         "summaryStatistics": { "totalCount": 5929 },
         "edges": []
+      },
+      {
+        "referenceId": 10,
+        "name": "reporting-lambda",
+        "type": "AWS::Lambda::Function",
+        "arn": "arn:aws:lambda:us-east-1:123456789012:function:reporting-lambda",
+        "state": "active",
+        "summaryStatistics": { "totalCount": 1440 },
+        "edges": [
+          {
+            "referenceId": 4,
+            "summaryStatistics": { "totalCount": 1440 }
+          }
+        ]
       }
     ]
   }
