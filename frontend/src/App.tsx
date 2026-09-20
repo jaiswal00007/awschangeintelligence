@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Zap, Activity, TrendingDown, Settings, Lock } from 'lucide-react'
 import { fetchResources, analyzeChange, fetchGraph } from './api'
 import type { Resource, AnalysisResult, GraphData, AffectedNode } from './types'
 import { RiskBadge } from './components/RiskBadge'
@@ -9,11 +11,11 @@ import { NodeDetailPanel } from './components/NodeDetailPanel'
 import { useTypewriter } from './hooks/useTypewriter'
 
 const CHANGE_TYPES = [
-  { value: 'delete',        label: 'DELETE',   color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   border: '#ef4444' },
-  { value: 'downsize',      label: 'DOWNSIZE', color: '#f97316', bg: 'rgba(249,115,22,0.1)',   border: '#f97316' },
-  { value: 'config_change', label: 'CONFIG',   color: '#eab308', bg: 'rgba(234,179,8,0.08)',   border: '#eab308' },
-  { value: 'scale',         label: 'SCALE',    color: '#3b82f6', bg: 'rgba(59,130,246,0.08)',  border: '#3b82f6' },
-  { value: 'iam_change',    label: 'IAM',      color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',   border: '#8b5cf6' },
+  { value: 'delete',        label: 'DELETE',   color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   border: '#ef4444',  Icon: TrendingDown },
+  { value: 'downsize',      label: 'DOWNSIZE', color: '#f97316', bg: 'rgba(249,115,22,0.1)',   border: '#f97316',  Icon: TrendingDown },
+  { value: 'config_change', label: 'CONFIG',   color: '#eab308', bg: 'rgba(234,179,8,0.08)',   border: '#eab308',  Icon: Settings },
+  { value: 'scale',         label: 'SCALE',    color: '#3b82f6', bg: 'rgba(59,130,246,0.08)',  border: '#3b82f6',  Icon: Activity },
+  { value: 'iam_change',    label: 'IAM',      color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',   border: '#8b5cf6',  Icon: Lock },
 ]
 
 const RESOURCE_TYPE_ICON: Record<string, string> = {
@@ -109,10 +111,11 @@ export default function App() {
       <header className="shrink-0 border-b border-[#1a2438] px-6 py-0 flex items-center justify-between sticky top-0 z-30 h-11"
         style={{ background: 'rgba(3,5,13,0.95)', backdropFilter: 'blur(12px)' }}>
         <div className="flex items-center gap-3">
-          <div className="text-base font-black font-mono glitch-title"
+          <div className="flex items-center gap-2 text-base font-black font-mono glitch-title"
             style={{ color: '#3b82f6', letterSpacing: '0.06em' }}
-            data-text="⚡ AWS CHANGE INTELLIGENCE">
-            ⚡ AWS CHANGE INTELLIGENCE
+            data-text="AWS CHANGE INTELLIGENCE">
+            <Zap size={16} className="shrink-0" style={{ color: '#3b82f6', filter: 'drop-shadow(0 0 4px #3b82f6)' }} />
+            AWS CHANGE INTELLIGENCE
           </div>
           <div className="hidden md:block text-xs text-[#475569] font-mono border-l border-[#1a2438] pl-3 uppercase tracking-widest">
             Pre-Change Blast Radius Analysis
@@ -220,10 +223,11 @@ export default function App() {
             <div className="flex gap-2 flex-wrap">
               {CHANGE_TYPES.map(ct => (
                 <button key={ct.value} onClick={() => setChangeType(ct.value)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-mono font-bold border transition-all"
+                  className="rounded-lg px-3 py-1.5 text-xs font-mono font-bold border transition-all flex items-center gap-1.5"
                   style={changeType === ct.value
                     ? { background: ct.bg, borderColor: ct.border, color: ct.color, boxShadow: `0 0 8px ${ct.border}33` }
                     : { background: 'transparent', borderColor: '#1a2438', color: '#475569' }}>
+                  <ct.Icon size={11} />
                   {ct.label}
                 </button>
               ))}
@@ -284,13 +288,23 @@ export default function App() {
       </div>
 
       {/* ── IMPACT REPORT ── */}
+      <AnimatePresence>
       {result && (
-        <div className="flex-1 px-6 py-5 space-y-5 max-w-[1600px] w-full mx-auto"
+        <motion.div
+          className="flex-1 px-6 py-5 space-y-5 max-w-[1600px] w-full mx-auto"
           key={result.change.target + result.change.change_type}
-          ref={particleContainerRef}>
+          ref={particleContainerRef}
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+        >
 
           {/* Row 1: What is changing */}
-          <div className="rounded-xl border border-[#1a2438] p-4 card-enter" style={{ background: '#060c17', animationDelay: '0ms' }}>
+          <motion.div
+            className="rounded-xl border border-[#1a2438] p-4"
+            style={{ background: '#060c17' }}
+            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
+          >
             <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3">// What Is Changing</div>
             <div className="flex items-center gap-4 flex-wrap">
               <div className="text-3xl">{icon(selectedResource?.resource_type || '')}</div>
@@ -311,10 +325,13 @@ export default function App() {
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Row 2: Risk + Blind Spots + Verdict */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 card-enter" style={{ animationDelay: '60ms' }}>
+          <motion.div
+            className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
+          >
             {/* Risk */}
             <div>
               <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2">// Risk Score</div>
@@ -363,10 +380,14 @@ export default function App() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Row 3: Blast summary */}
-          <div className="rounded-xl border border-[#1a2438] p-4 card-enter" style={{ background: '#060c17', animationDelay: '120ms' }}>
+          <motion.div
+            className="rounded-xl border border-[#1a2438] p-4"
+            style={{ background: '#060c17' }}
+            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
+          >
             <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3">// Blast Radius Summary</div>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {[
@@ -392,7 +413,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Row 4: Cost Impact */}
           {(() => {
@@ -403,7 +424,11 @@ export default function App() {
             const absTotal  = Math.abs(total)
             const tc        = isUp ? '#ef4444' : '#22c55e'
             return (
-              <div className="rounded-xl border border-[#1a2438] p-4 card-enter" style={{ background: '#060c17', animationDelay: '180ms' }}>
+              <motion.div
+                className="rounded-xl border border-[#1a2438] p-4"
+                style={{ background: '#060c17' }}
+                variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
+              >
                 <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3">
                   // Cost Impact
                   <span className="ml-2 text-xs px-2 py-0.5 rounded border font-mono"
@@ -430,13 +455,16 @@ export default function App() {
                     )
                   })}
                 </div>
-              </div>
+              </motion.div>
             )
           })()}
 
           {/* Row 5: Historical + Change Plan */}
           {(result.historical_matches.length > 0 || result.risk.level === 'high' || result.risk.level === 'critical') && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 card-enter" style={{ animationDelay: '240ms' }}>
+            <motion.div
+              className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+              variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
+            >
               {result.historical_matches.length > 0 && (
                 <div>
                   <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2">// Historical Precedent</div>
@@ -480,10 +508,11 @@ export default function App() {
                   )}
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   )
 }

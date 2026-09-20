@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import type { RiskResult, BlastRadiusSummary } from '../types'
 
 interface Props {
@@ -16,19 +17,11 @@ const LEVEL_CONFIG = {
 }
 
 export function ThreatHUD({ risk, blastSummary, blindSpotCount, historicalCount }: Props) {
-  const [fillPct,      setFillPct]      = useState(0)
-  const [pillsVisible, setPillsVisible] = useState(0)
+  const [key, setKey] = useState(0)
   const cfg = LEVEL_CONFIG[risk.level as keyof typeof LEVEL_CONFIG] || LEVEL_CONFIG.low
 
-  useEffect(() => {
-    setFillPct(0); setPillsVisible(0)
-    const t1 = setTimeout(() => setFillPct(risk.score), 80)
-    const t2 = setTimeout(() => setPillsVisible(1), 500)
-    const t3 = setTimeout(() => setPillsVisible(2), 680)
-    const t4 = setTimeout(() => setPillsVisible(3), 860)
-    const t5 = setTimeout(() => setPillsVisible(4), 1040)
-    return () => [t1,t2,t3,t4,t5].forEach(clearTimeout)
-  }, [risk.score, risk.level])
+  // Re-trigger animation on new result
+  useEffect(() => { setKey(k => k + 1) }, [risk.score, risk.level])
 
   const pills = [
     blastSummary.customer_facing
@@ -44,33 +37,53 @@ export function ThreatHUD({ risk, blastSummary, blindSpotCount, historicalCount 
   ]
 
   return (
-    <div className={`h-full flex flex-col gap-2.5 ${cfg.pulse ? 'pulse-red' : ''}`}>
-      {/* Score bar row */}
+    <div key={key} className={`h-full flex flex-col gap-3 ${cfg.pulse ? 'pulse-red' : ''}`}>
+      {/* Score row */}
       <div className="flex items-center gap-3">
-        <div className="text-3xl font-black font-mono tabular-nums leading-none"
-          style={{ color: cfg.color, textShadow: `0 0 16px ${cfg.color}` }}>
+        <motion.div
+          className="text-3xl font-black font-mono tabular-nums leading-none"
+          style={{ color: cfg.color, textShadow: `0 0 20px ${cfg.color}` }}
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+        >
           {risk.score}
-        </div>
-        <div className="text-lg font-black font-mono uppercase tracking-widest"
-          style={{ color: cfg.color, textShadow: `0 0 10px ${cfg.color}88` }}>
+        </motion.div>
+        <motion.div
+          className="text-lg font-black font-mono uppercase tracking-widest"
+          style={{ color: cfg.color, textShadow: `0 0 12px ${cfg.color}88` }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.12 }}
+        >
           {cfg.label}
-        </div>
+        </motion.div>
+        {/* Progress bar */}
         <div className="flex-1 h-2 rounded-full bg-[#0d1424] border border-[#1a2438] overflow-hidden ml-1">
-          <div className="h-full rounded-full transition-all duration-[1100ms] ease-out"
-            style={{ width: `${fillPct}%`, background: `linear-gradient(90deg, ${cfg.color}88, ${cfg.color})`, boxShadow: `0 0 8px ${cfg.color}` }} />
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: `linear-gradient(90deg, ${cfg.color}66, ${cfg.color})`, boxShadow: `0 0 10px ${cfg.color}` }}
+            initial={{ width: '0%' }}
+            animate={{ width: `${risk.score}%` }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
+          />
         </div>
       </div>
 
-      {/* Pills */}
+      {/* Staggered pills */}
       <div className="flex flex-wrap gap-1.5">
         {pills.map((pill, i) => (
-          <div key={i} className="transition-all duration-200"
-            style={{ opacity: pillsVisible > i ? 1 : 0, transform: pillsVisible > i ? 'translateY(0)' : 'translateY(5px)' }}>
+          <motion.div
+            key={pill.label}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + i * 0.18, duration: 0.22 }}
+          >
             <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded border"
-              style={{ color: pill.color, borderColor: `${pill.color}33`, background: `${pill.color}0c` }}>
+              style={{ color: pill.color, borderColor: `${pill.color}33`, background: `${pill.color}0d` }}>
               {pill.label}
             </span>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
