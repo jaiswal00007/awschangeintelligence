@@ -33,9 +33,9 @@ def _compute_delta(
     if change_type == "delete":
         return {
             "monthly_delta_usd": round(-baseline, 2),
-            "driver": "resource_deleted",
+            "driver": "dependency_on_deleted_resource",
             "baseline_usd": round(baseline, 2),
-            "confidence": 0.9,
+            "confidence": 0.6,
         }
 
     if change_type in ("downsize", "scale", "config_change") and before and after:

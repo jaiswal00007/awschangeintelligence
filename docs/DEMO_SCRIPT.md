@@ -86,11 +86,13 @@
 **Say:**
 > "And here's the number that gets finance's attention.
 >
-> $285 per month in downstream services that would be affected. The payments RDS alone is $182 a month in operational cost tied to this Lambda.
+> $284 per month in at-risk operational cost across the blast radius. The payments RDS alone — $182 a month. The checkout API — $35. The fraud detection service — $31.
+>
+> Every one of these services has a declared dependency on the Lambda we're deleting. They don't break cleanly — they start throwing errors, retrying, burning compute, and running up costs before anyone notices the root cause.
 >
 > This isn't just an outage risk. Every change has a cost blast radius — and nobody was measuring it."
 
-**Point to:** The neon green cost tiles, especially payments-rds showing `-$182/mo`.
+**Point to:** The cost tiles, especially payments-rds showing `-$182/mo` and the total badge in the section header.
 
 ---
 
@@ -118,7 +120,7 @@
 - On blind spots: *"A blind spot is any edge X-Ray observed but Config doesn't know about. That's where real incidents hide."*
 - On the score: *"The score goes 0–100. Critical is 75+. This change is an 88 — you don't push this on a Friday."*
 - On cost: *"We modeled billing against AWS Cost Explorer pricing — Lambda GB-seconds, RDS instance hours, DynamoDB on-demand units."*
-- On the stack: *"FastAPI backend, NetworkX graph engine, React + ForceGraph2D frontend, Claude on Bedrock for the verdict."*
+- On the stack: *"FastAPI backend, NetworkX graph engine, React Three Fiber 3D graph, Claude on Bedrock for the verdict."*
 
 ---
 
