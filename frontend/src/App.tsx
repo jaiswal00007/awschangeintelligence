@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Activity, TrendingDown, Settings, Lock } from 'lucide-react'
+import { Zap, Activity, TrendingDown, Settings, Lock, MessageSquare } from 'lucide-react'
 import { fetchResources, analyzeChange, fetchGraph } from './api'
 import type { Resource, AnalysisResult, GraphData, AffectedNode } from './types'
 import { RiskBadge } from './components/RiskBadge'
@@ -8,6 +8,7 @@ import { DependencyGraph } from './components/DependencyGraph'
 import { BootScreen } from './components/BootScreen'
 import { ThreatHUD } from './components/ThreatHUD'
 import { NodeDetailPanel } from './components/NodeDetailPanel'
+import { ChatPanel } from './components/ChatPanel'
 import { useTypewriter } from './hooks/useTypewriter'
 
 const CHANGE_TYPES = [
@@ -50,6 +51,7 @@ export default function App() {
   const [planExpanded,  setPlanExpanded]  = useState(false)
   const [hops,          setHops]          = useState(3)
   const [selectedNode,  setSelectedNode]  = useState<AffectedNode | null>(null)
+  const [chatOpen,      setChatOpen]      = useState(false)
   const particleContainerRef = useRef<HTMLDivElement>(null)
 
   const { displayed: displayedVerdict } = useTypewriter(result?.verdict ?? '', 20)
@@ -132,9 +134,21 @@ export default function App() {
               </span>
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#475569]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" style={{ boxShadow: '0 0 5px #22c55e' }} />
-            ONLINE
+          <div className="flex items-center gap-2">
+            {result && (
+              <button onClick={() => setChatOpen(x => !x)}
+                className="flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border transition-all"
+                style={chatOpen
+                  ? { background: 'rgba(59,130,246,0.12)', borderColor: '#3b82f6', color: '#3b82f6' }
+                  : { background: 'transparent', borderColor: '#1a2438', color: '#475569' }}>
+                <MessageSquare size={12} />
+                Ask AI
+              </button>
+            )}
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#475569]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" style={{ boxShadow: '0 0 5px #22c55e' }} />
+              ONLINE
+            </div>
           </div>
         </div>
       </header>
@@ -512,6 +526,12 @@ export default function App() {
           )}
         </motion.div>
       )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {chatOpen && result && (
+          <ChatPanel result={result} onClose={() => setChatOpen(false)} />
+        )}
       </AnimatePresence>
     </div>
   )

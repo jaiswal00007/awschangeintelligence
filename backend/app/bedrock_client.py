@@ -91,6 +91,130 @@ def _build_change_plan(risk_level: str, blind_spots: list,
     return steps
 
 
+def _fallback_chat(message: str, context: dict) -> str:
+    """Deterministic fallback chat when MOCK_BEDROCK=true or LLM unavailable."""
+    msg = message.lower()
+    risk_level = context.get("risk", {}).get("level", "unknown")
+    blind_spots = context.get("blind_spots", [])
+    change_type = context.get("change", {}).get("change_type", "unknown")
+    affected = context.get("affected_nodes", [])
+    cost_nodes = [n for n in affected if n.get("cost_delta")]
+    total_cost = sum(abs(n["cost_delta"]["monthly_delta_usd"]) for n in cost_nodes)
+
+    if any(w in msg for w in ["cost", "money", "dollar", "price", "billing", "expense"]):
+        if cost_nodes:
+            top = sorted(cost_nodes, key=lambda n: abs(n["cost_delta"]["monthly_delta_usd"]), reverse=True)[:3]
+            lines = ", ".join(f"{n['name']} (${abs(n['cost_delta']['monthly_delta_usd']):.0f}/mo)" for n in top)
+            return (
+                f"Total at-risk monthly cost across the blast radius: ${total_cost:.2f}/mo. "
+                f"Top contributors: {lines}. "
+                f"These services depend on the change target — if it fails or is deleted, "
+                f"they incur retry/error-handling compute costs until the dependency is resolved."
+            )
+        return "No cost deltas were computed for this change. Cost impact is only shown for delete operations or config changes with before/after values provided."
+
+    if any(w in msg for w in ["blind spot", "hidden", "undocumented", "unknown dep"]):
+        if blind_spots:
+            bs = blind_spots[0]
+            return (
+                f"Blind spot detected: {bs['source_name']} calls {bs['target_name']} "
+                f"{bs['observed_count']:,} times/week via {bs['observed_via']}, "
+                f"but this relationship is absent from AWS Config and AppRegistry. "
+                f"Why hidden: {bs['why_hidden']}. "
+                f"If this change proceeds, {bs['source_name']} will fail silently."
+            )
+        return "No blind spots detected for this change. All observed dependencies match declared relationships in AWS Config."
+
+    if any(w in msg for w in ["risk", "score", "safe", "dangerous", "should i", "proceed"]):
+        signals = context.get("risk", {}).get("signals", {})
+        signal_lines = "; ".join(f"{k.replace('_', ' ')} (+{v:.0f})" for k, v in signals.items())
+        return (
+            f"Risk level is {risk_level.upper()} based on {len(signals)} signals: {signal_lines}. "
+            f"{'This change is not safe to proceed without a validated change plan.' if risk_level in ('critical','high') else 'This change can proceed with standard monitoring.'}"
+        )
+
+    if any(w in msg for w in ["blast", "affect", "impact", "break", "downstream"]):
+        critical = [n for n in affected if n.get("criticality") in ("critical", "high")]
+        return (
+            f"{len(affected)} nodes in blast radius. "
+            f"{len(critical)} are critical/high criticality: {', '.join(n['name'] for n in critical[:4])}. "
+            f"Customer-facing surface {'IS' if context.get('blast_radius', {}).get('customer_facing') else 'is NOT'} reachable."
+        )
+
+    if any(w in msg for w in ["plan", "step", "how to", "what should", "rollback", "deploy"]):
+        plan = context.get("change_plan", [])
+        if plan:
+            return "Change plan: " + " → ".join(f"[{i+1}] {s[:60]}" for i, s in enumerate(plan[:5]))
+        return "No change plan generated — risk level is medium or lower. Standard change process applies."
+
+    if any(w in msg for w in ["why", "explain", "reason", "because"]):
+        return (
+            f"This change scored {context.get('risk', {}).get('score', '?')} ({risk_level}) because: "
+            f"{context.get('verdict', 'See verdict card for full analysis.')} "
+            f"{context.get('recommendation', '')}"
+        )
+
+    # Default
+    return (
+        f"I have full context on this {change_type} change. Risk: {risk_level.upper()}, "
+        f"{len(affected)} affected nodes, {len(blind_spots)} blind spot(s), "
+        f"${total_cost:.0f}/mo at-risk cost. "
+        f"Ask me about cost impact, blind spots, blast radius, risk signals, or the change plan."
+    )
+
+
+def chat(message: str, context: dict) -> str:
+    """Answer a question about the current analysis. Uses LLM proxy or fallback."""
+    mock_mode = os.getenv("MOCK_BEDROCK", "true").lower() == "true"
+
+    if mock_mode:
+        return _fallback_chat(message, context)
+
+    proxy_url = os.getenv("LLM_PROXY_URL", "http://localhost:6655")
+    api_key = os.getenv("LLM_PROXY_API_KEY", "")
+    model = os.getenv("LLM_PROXY_MODEL", "claude-sonnet-4-5")
+    path = os.getenv("LLM_PROXY_PATH", "/anthropic/v1/messages")
+
+    system_prompt = (
+        "You are an AWS change-risk assistant embedded in the AWS Change Intelligence tool. "
+        "Answer questions ONLY based on the provided analysis context — the graph, blast radius, "
+        "risk signals, blind spots, cost deltas, and change plan. "
+        "Be concise (2-4 sentences max). Never invent dependencies or resources not listed. "
+        "Speak like a senior SRE giving a direct answer."
+    )
+
+    user_prompt = (
+        f"Analysis context: {json.dumps(context)}\n\n"
+        f"Question: {message}"
+    )
+
+    payload = json.dumps({
+        "model": model,
+        "max_tokens": 512,
+        "system": system_prompt,
+        "messages": [{"role": "user", "content": user_prompt}],
+    }).encode()
+
+    req = urllib.request.Request(
+        f"{proxy_url}{path}",
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+            "anthropic-version": "2023-06-01",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            body = json.loads(resp.read())
+        return body["content"][0]["text"]
+    except Exception as e:
+        print("LLM CHAT ERROR:", e)
+        return _fallback_chat(message, context)
+
+
 def get_verdict(
     change_request: dict,
     blast_radius: dict,

@@ -26,3 +26,14 @@ export async function fetchGraph(resourceId: string, hops = 2): Promise<GraphDat
   if (!res.ok) throw new Error('Graph fetch failed')
   return res.json()
 }
+
+export async function chatWithAnalysis(message: string, context: object): Promise<string> {
+  const res = await fetch(`${BASE}/change/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, context }),
+  })
+  if (!res.ok) throw new Error('Chat failed')
+  const data = await res.json()
+  return data.reply
+}

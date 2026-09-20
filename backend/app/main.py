@@ -3,13 +3,14 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from .datasource import MockDataSource
 from .graph_engine import build_graph, blast_radius as compute_blast_radius, get_subgraph
 from .blind_spot import detect_all_blind_spots, detect_blind_spots_for_target
 from .risk_scorer import score as compute_score
 from .incident_matcher import match as match_incidents
-from .bedrock_client import get_verdict
+from .bedrock_client import get_verdict, chat as bedrock_chat
 from .cost_estimator import estimate_cost_deltas
 from .models import (
     ChangeRequest, AnalysisResult, GraphResponse,
@@ -142,3 +143,14 @@ def analyze_change(req: ChangeRequest):
 def rerun_verdict(req: ChangeRequest):
     """Re-run only the LLM layer on an existing analysis (for prompt tuning)."""
     return analyze_change(req)
+
+
+class ChatRequest(BaseModel):
+    message: str
+    context: dict
+
+
+@app.post("/change/chat")
+def change_chat(req: ChatRequest):
+    reply = bedrock_chat(req.message, req.context)
+    return {"reply": reply}
