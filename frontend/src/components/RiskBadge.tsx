@@ -70,6 +70,16 @@ export function RiskBadge({ risk, expanded, onToggle }: Props) {
         {/* SVG ring + score */}
         <div className="relative flex-shrink-0 w-32 h-32">
           <svg viewBox="0 0 128 128" className="w-full h-full -rotate-90">
+            {/* Outer dashed rotating ring */}
+            <circle
+              cx="64" cy="64" r="62"
+              fill="none"
+              stroke={config.ring}
+              strokeWidth="1.5"
+              strokeDasharray="4 8"
+              className="ring-spin"
+              opacity="0.35"
+            />
             {/* Track */}
             <circle
               cx="64" cy="64" r={radius}

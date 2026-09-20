@@ -52,6 +52,7 @@ export default function App() {
   const [hops,          setHops]          = useState(3)
   const [selectedNode,  setSelectedNode]  = useState<AffectedNode | null>(null)
   const [chatOpen,      setChatOpen]      = useState(false)
+  const [scanBadge,     setScanBadge]     = useState(false)
   const particleContainerRef = useRef<HTMLDivElement>(null)
 
   const { displayed: displayedVerdict } = useTypewriter(result?.verdict ?? '', 20)
@@ -81,13 +82,13 @@ export default function App() {
     if (!selectedId) return
     if (e) particleBurst(e.clientX, e.clientY)
     setLoading(true); setError(''); setResult(null); setGraphData(null)
-    setSignalsExpanded(false); setPlanExpanded(false)
+    setSignalsExpanded(false); setPlanExpanded(false); setScanBadge(false)
     try {
       const req = { target: selectedId, change_type: changeType,
         before: beforeVal ? JSON.parse(beforeVal) : null,
         after:  afterVal  ? JSON.parse(afterVal)  : null }
       const [analysis, graph] = await Promise.all([analyzeChange(req), fetchGraph(selectedId, hops)])
-      setResult(analysis); setGraphData(graph); setSelectedNode(null)
+      setResult(analysis); setGraphData(graph); setSelectedNode(null); setScanBadge(true)
     } catch (e: any) { setError(e.message || 'Analysis failed') }
     finally { setLoading(false) }
   }
@@ -110,13 +111,13 @@ export default function App() {
       {!booted && <BootScreen onDone={() => setBooted(true)} />}
 
       {/* ── HEADER ── */}
-      <header className="shrink-0 border-b border-[#1a2438] px-6 py-0 flex items-center justify-between sticky top-0 z-30 h-11"
-        style={{ background: 'rgba(3,5,13,0.95)', backdropFilter: 'blur(12px)' }}>
+      <header className="shrink-0 border-b border-[rgba(59,130,246,0.2)] px-6 py-0 flex items-center justify-between sticky top-0 z-30 h-11"
+        style={{ background: 'rgba(3,5,13,0.9)', backdropFilter: 'blur(24px)', boxShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-base font-black font-mono glitch-title"
             style={{ color: '#3b82f6', letterSpacing: '0.06em' }}
             data-text="AWS CHANGE INTELLIGENCE">
-            <Zap size={16} className="shrink-0" style={{ color: '#3b82f6', filter: 'drop-shadow(0 0 4px #3b82f6)' }} />
+            <Zap size={16} className="shrink-0" style={{ color: '#3b82f6', filter: 'drop-shadow(0 0 6px #3b82f6)' }} />
             AWS CHANGE INTELLIGENCE
           </div>
           <div className="hidden md:block text-xs text-[#475569] font-mono border-l border-[#1a2438] pl-3 uppercase tracking-widest">
@@ -129,7 +130,7 @@ export default function App() {
               <span className="text-[#475569]">scan:</span>
               <span className="text-[#94a3b8]">{selectedResource?.name}</span>
               <span className="px-2 py-0.5 rounded font-bold"
-                style={{ color: rColor, background: `${rColor}18`, border: `1px solid ${rColor}44` }}>
+                style={{ color: rColor, background: `${rColor}18`, border: `1px solid ${rColor}44`, boxShadow: `0 0 8px ${rColor}33` }}>
                 {result.risk.level.toUpperCase()} {result.risk.score}
               </span>
             </div>
@@ -139,22 +140,31 @@ export default function App() {
               <button onClick={() => setChatOpen(x => !x)}
                 className="flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border transition-all"
                 style={chatOpen
-                  ? { background: 'rgba(59,130,246,0.12)', borderColor: '#3b82f6', color: '#3b82f6' }
+                  ? { background: 'rgba(59,130,246,0.12)', borderColor: '#3b82f6', color: '#3b82f6', boxShadow: '0 0 10px rgba(59,130,246,0.2)' }
                   : { background: 'transparent', borderColor: '#1a2438', color: '#475569' }}>
                 <MessageSquare size={12} />
                 Ask AI
               </button>
             )}
-            <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#475569]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" style={{ boxShadow: '0 0 5px #22c55e' }} />
-              ONLINE
+            <div className="flex items-center gap-2 text-[11px] font-mono text-[#22c55e] pl-2 border-l border-[#1a2438]">
+              <div className="beacon" />
+              <span className="font-bold tracking-widest glow-green">ONLINE</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* ── 3D GRAPH — fixed 55vh ── */}
-      <div className="relative border-b border-[#1a2438]" style={{ height: '55vh', minHeight: 400 }}>
+      <div className="relative border-b border-[rgba(59,130,246,0.15)]" style={{ height: '55vh', minHeight: 400 }}>
+        {/* Aurora light blades */}
+        {!graphData && (
+          <div className="aurora-bg">
+            <div className="aurora-blade blade-1" />
+            <div className="aurora-blade blade-2" />
+            <div className="aurora-blade blade-3" />
+            <div className="aurora-vignette" />
+          </div>
+        )}
         {graphData && result ? (
           <div className="w-full h-full relative">
             <DependencyGraph
@@ -201,12 +211,12 @@ export default function App() {
       </div>
 
       {/* ── CONTROL STRIP — 220px, two columns ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-[440px_1fr] border-b border-[#1a2438]" style={{ minHeight: 220 }}>
+      <div className="grid grid-cols-1 xl:grid-cols-[440px_1fr] border-b border-[rgba(59,130,246,0.15)]" style={{ minHeight: 220 }}>
 
         {/* Change Composer */}
-        <div className="border-r border-[#1a2438] flex flex-col overflow-hidden" style={{ background: '#060c17' }}>
-          <div className="px-4 py-2.5 border-b border-[#1a2438] flex items-center justify-between shrink-0">
-            <span className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em]">// Change Composer</span>
+        <div className="border-r border-[#1a2438] flex flex-col overflow-hidden glass-panel-elevated">
+          <div className="px-4 py-2.5 border-b border-[rgba(59,130,246,0.12)] flex items-center justify-between shrink-0">
+            <span className="header-scan text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em]">// Change Composer</span>
             <span className="text-xs font-mono text-[#475569]">{resources.length} resources</span>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -237,9 +247,9 @@ export default function App() {
             <div className="flex gap-2 flex-wrap">
               {CHANGE_TYPES.map(ct => (
                 <button key={ct.value} onClick={() => setChangeType(ct.value)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-mono font-bold border transition-all flex items-center gap-1.5"
+                  className={`rounded-lg px-3 py-1.5 text-xs font-mono font-bold border transition-all flex items-center gap-1.5${changeType === ct.value ? ' btn-active-neon' : ''}`}
                   style={changeType === ct.value
-                    ? { background: ct.bg, borderColor: ct.border, color: ct.color, boxShadow: `0 0 8px ${ct.border}33` }
+                    ? { background: ct.bg, borderColor: ct.border, color: ct.color, boxShadow: `0 0 8px ${ct.border}33`, ['--pulse-color' as any]: `${ct.color}55` }
                     : { background: 'transparent', borderColor: '#1a2438', color: '#475569' }}>
                   <ct.Icon size={11} />
                   {ct.label}
@@ -280,9 +290,9 @@ export default function App() {
         </div>
 
         {/* Threat Assessment */}
-        <div className="flex flex-col overflow-hidden" style={{ background: '#060c17' }}>
-          <div className="px-4 py-2.5 border-b border-[#1a2438] shrink-0">
-            <span className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em]">// Threat Assessment</span>
+        <div className="flex flex-col overflow-hidden glass-panel-elevated">
+          <div className="px-4 py-2.5 border-b border-[rgba(59,130,246,0.12)] shrink-0">
+            <span className="header-scan text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em]">// Threat Assessment</span>
           </div>
           <div className="flex-1 overflow-hidden p-3">
             {result ? (
@@ -319,7 +329,7 @@ export default function App() {
             style={{ background: '#060c17' }}
             variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
           >
-            <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3">// What Is Changing</div>
+            <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3"><span className="header-scan">// What Is Changing</span></div>
             <div className="flex items-center gap-4 flex-wrap">
               <div className="text-3xl">{icon(selectedResource?.resource_type || '')}</div>
               <div className="flex-1 min-w-0">
@@ -348,14 +358,14 @@ export default function App() {
           >
             {/* Risk */}
             <div>
-              <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2">// Risk Score</div>
+              <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2"><span className="header-scan">// Risk Score</span></div>
               <RiskBadge risk={result.risk} expanded={signalsExpanded} onToggle={() => setSignalsExpanded(x => !x)} />
             </div>
 
             {/* Blind Spots */}
             <div>
               <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2">
-                // Blind Spots
+                <span className="header-scan">// Blind Spots</span>
                 {result.blind_spots.length > 0 && <span className="text-[#ef4444] ml-2">⚠ {result.blind_spots.length}</span>}
               </div>
               {result.blind_spots.length === 0 ? (
@@ -383,7 +393,7 @@ export default function App() {
 
             {/* Verdict */}
             <div>
-              <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2">// AI Verdict</div>
+              <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2"><span className="header-scan">// AI Verdict</span></div>
               <div className="rounded-xl border border-[#1a2438] p-4 space-y-3" style={{ background: '#060c17' }}>
                 <p className="text-sm text-[#94a3b8] leading-relaxed">
                   {displayedVerdict}<span className="inline-block w-1.5 h-3 bg-[#3b82f6] ml-0.5 animate-pulse" style={{ verticalAlign: 'middle' }} />
@@ -402,7 +412,7 @@ export default function App() {
             style={{ background: '#060c17' }}
             variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
           >
-            <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3">// Blast Radius Summary</div>
+            <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3"><span className="header-scan">// Blast Radius Summary</span></div>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {[
                 { label: 'Resources',    val: result.blast_radius.resources,    color: '#3b82f6' },
@@ -444,7 +454,7 @@ export default function App() {
                 variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22,1,0.36,1] } } }}
               >
                 <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-3">
-                  // Cost Impact
+                  <span className="header-scan">// Cost Impact</span>
                   <span className="ml-2 text-xs px-2 py-0.5 rounded border font-mono"
                     style={{ color: tc, borderColor: `${tc}33`, background: `${tc}0a` }}>
                     {isUp ? '+' : '-'}${absTotal.toFixed(2)}/mo
@@ -481,7 +491,7 @@ export default function App() {
             >
               {result.historical_matches.length > 0 && (
                 <div>
-                  <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2">// Historical Precedent</div>
+                  <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2"><span className="header-scan">// Historical Precedent</span></div>
                   <div className="space-y-2">
                     {result.historical_matches.slice(0,3).map((m, i) => (
                       <div key={i} className="rounded-xl border border-[#1a2438] px-3 py-3 text-xs font-mono space-y-1.5" style={{ background: '#060c17' }}>
@@ -500,7 +510,7 @@ export default function App() {
               )}
               {(result.risk.level === 'high' || result.risk.level === 'critical') && (
                 <div>
-                  <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2">// Change Plan</div>
+                  <div className="text-sm font-mono font-bold text-[#3b82f6] uppercase tracking-[0.2em] mb-2"><span className="header-scan">// Change Plan</span></div>
                   <button onClick={() => setPlanExpanded(x => !x)}
                     className="w-full rounded-lg border font-mono font-bold py-2.5 text-xs transition-all mb-2"
                     style={planExpanded
@@ -533,6 +543,15 @@ export default function App() {
           <ChatPanel result={result} onClose={() => setChatOpen(false)} />
         )}
       </AnimatePresence>
+
+      {/* Scan complete badge */}
+      {scanBadge && (
+        <div className="fixed bottom-6 left-6 z-50 scan-badge flex items-center gap-2 text-[11px] font-mono px-3 py-1.5 rounded-full border border-[rgba(34,197,94,0.4)] text-[#22c55e]"
+          style={{ background: 'rgba(34,197,94,0.08)', backdropFilter: 'blur(8px)' }}>
+          <div className="beacon" />
+          SCAN COMPLETE
+        </div>
+      )}
     </div>
   )
 }

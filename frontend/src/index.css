@@ -190,3 +190,148 @@ input[type="range"].hop-slider::-webkit-slider-thumb {
 
 /* Score ring */
 @keyframes ring-draw { from { stroke-dashoffset: 339.3; } }
+
+/* ── Aurora Elevated Enhancements ── */
+
+/* Premium glassmorphism panel */
+.glass-panel-elevated {
+  background: rgba(6, 12, 23, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* Aurora animated light-blades behind the 3D graph */
+.aurora-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #020510;
+}
+.aurora-blade {
+  position: absolute;
+  width: 160%;
+  height: 45%;
+  left: -30%;
+  filter: blur(72px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  border-radius: 50%;
+}
+.blade-1 {
+  top: 5%;
+  background: linear-gradient(110deg, transparent 10%, #ef4444 40%, #f97316 60%, transparent 90%);
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+}
+.blade-2 {
+  bottom: 10%;
+  background: linear-gradient(110deg, transparent 10%, #3b82f6 40%, #06b6d4 60%, transparent 90%);
+  animation: aurora-drift-rev 18s ease-in-out infinite alternate;
+  opacity: 0.45;
+}
+.blade-3 {
+  top: 35%;
+  left: 10%;
+  width: 80%;
+  height: 30%;
+  background: linear-gradient(90deg, transparent 20%, #8b5cf6 50%, transparent 80%);
+  animation: aurora-drift 28s ease-in-out infinite alternate-reverse;
+  opacity: 0.2;
+}
+.aurora-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, #020510 100%);
+  pointer-events: none;
+}
+@keyframes aurora-drift {
+  0%   { transform: translateY(20px)  rotate(-4deg) scale(1);   opacity: 0.4; }
+  50%  { transform: translateY(-30px) rotate(2deg)  scale(1.1); opacity: 0.65; }
+  100% { transform: translateY(10px)  rotate(-1deg) scale(0.9); opacity: 0.5; }
+}
+@keyframes aurora-drift-rev {
+  0%   { transform: translateY(-20px) rotate(4deg)  scale(0.9); opacity: 0.45; }
+  50%  { transform: translateY(30px)  rotate(-3deg) scale(1.1); opacity: 0.75; }
+  100% { transform: translateY(-10px) rotate(3deg)  scale(1);   opacity: 0.4; }
+}
+
+/* Section header scanline sweep */
+.header-scan {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+.header-scan::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,0.7), transparent);
+  animation: scanline-sweep 4s ease-in-out infinite;
+}
+@keyframes scanline-sweep {
+  0%   { left: -120%; }
+  30%  { left: 160%; }
+  100% { left: 160%; }
+}
+
+/* Live beacon (ONLINE indicator) */
+.beacon {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+.beacon::before,
+.beacon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(34,197,94,0.5);
+  animation: beacon-ring 2s ease-out infinite;
+}
+.beacon::after { animation-delay: 1s; }
+@keyframes beacon-ring {
+  0%   { width: 100%;  height: 100%;  opacity: 0.8; }
+  100% { width: 300%;  height: 300%;  opacity: 0; }
+}
+
+/* Active change-type button neon pulse */
+@keyframes btn-neon-pulse {
+  0%, 100% { box-shadow: 0 0 6px var(--pulse-color, rgba(59,130,246,0.3)); }
+  50%       { box-shadow: 0 0 18px var(--pulse-color, rgba(59,130,246,0.8)); }
+}
+.btn-active-neon { animation: btn-neon-pulse 1.8s ease-in-out infinite; }
+
+/* Scan-complete floating badge */
+@keyframes badge-float-in {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.scan-badge {
+  opacity: 0;
+  animation: badge-float-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards;
+}
+
+/* Rotating outer dashed ring for RiskBadge */
+@keyframes ring-rotate {
+  to { transform: rotate(360deg); }
+}
+.ring-spin {
+  transform-origin: center;
+  animation: ring-rotate 20s linear infinite;
+}
+
+/* Card top-border glow (colored by risk level) */
+.card-risk-glow {
+  border-top: 2px solid var(--risk-color, #3b82f6);
+  box-shadow: 0 -4px 16px rgba(var(--risk-color-rgb, 59,130,246), 0.15);
+}
