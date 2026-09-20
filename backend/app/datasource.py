@@ -24,6 +24,9 @@ class DataSource(ABC):
     @abstractmethod
     def get_incidents(self) -> list[dict]: ...
 
+    @abstractmethod
+    def get_costs(self) -> list[dict]: ...
+
 
 class MockDataSource(DataSource):
     def __init__(self, fixtures_path: str):
@@ -41,6 +44,7 @@ class MockDataSource(DataSource):
         self._appregistry = load("appregistry.json")["applications"]
         self._alarms = load("alarms.json")["metricAlarms"]
         self._incidents = load("incidents.json")["incidents"]
+        self._costs = load("costs.json")["resourceCosts"]
 
     def get_resources(self) -> list[dict]:
         return self._resources
@@ -62,3 +66,6 @@ class MockDataSource(DataSource):
 
     def get_incidents(self) -> list[dict]:
         return self._incidents
+
+    def get_costs(self) -> list[dict]:
+        return self._costs

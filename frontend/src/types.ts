@@ -22,6 +22,13 @@ export interface BlastRadiusSummary {
   customer_facing: boolean
 }
 
+export interface CostDelta {
+  monthly_delta_usd: number
+  driver: string
+  baseline_usd: number
+  confidence: number
+}
+
 export interface AffectedNode {
   node_id: string
   name: string
@@ -30,6 +37,7 @@ export interface AffectedNode {
   criticality: string
   hop_distance: number
   path: string[]
+  cost_delta?: CostDelta
 }
 
 export interface BlindSpot {

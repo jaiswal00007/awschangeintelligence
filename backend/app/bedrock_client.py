@@ -1,33 +1,30 @@
 import json
 import os
-from typing import Any
+import urllib.request
+import urllib.error
 
 
 def _fallback_verdict(risk_level: str, signals: dict, blind_spots: list,
                       historical_matches: list, change_type: str) -> dict:
-    """Deterministic fallback — used when Bedrock unavailable or MOCK_BEDROCK=true."""
-    level_label = risk_level.upper()
-
+    """Deterministic fallback — used when LLM proxy is unavailable or MOCK_BEDROCK=true."""
     if risk_level == "critical":
-        verdict = f"CRITICAL RISK — do not proceed without a change plan."
+        verdict = "CRITICAL RISK — do not proceed without a change plan."
         rec = "Block this change. Create a change plan, validate all dependencies, notify affected teams, and schedule a maintenance window."
     elif risk_level == "high":
-        verdict = f"HIGH RISK — proceed only with explicit validation steps."
+        verdict = "HIGH RISK — proceed only with explicit validation steps."
         rec = "Run a canary deployment. Validate all flagged dependencies before full rollout."
     elif risk_level == "medium":
-        verdict = f"MEDIUM RISK — proceed with caution and monitoring."
+        verdict = "MEDIUM RISK — proceed with caution and monitoring."
         rec = "Ensure rollback is ready. Notify owning teams and monitor alarms closely for 30 minutes post-change."
     else:
-        verdict = f"LOW RISK — change appears safe to proceed."
+        verdict = "LOW RISK — change appears safe to proceed."
         rec = "Standard change process. Monitor for 15 minutes post-change."
 
     reasoning = []
 
-    sig = signals.get("customer_facing", 0)
-    if sig > 0:
+    if signals.get("customer_facing", 0) > 0:
         reasoning.append("This change reaches a customer-facing surface — user-visible impact is possible.")
 
-    sig = signals.get("change_type_severity", 0)
     if change_type == "delete":
         reasoning.append("Delete operations are irreversible. Recovery requires redeployment.")
     elif change_type == "downsize":
@@ -55,9 +52,8 @@ def _fallback_verdict(risk_level: str, signals: dict, blind_spots: list,
                 f"Root cause: {best['root_cause']}"
             )
 
-    sig = signals.get("blast_radius_size", 0)
-    if sig > 8:
-        reasoning.append(f"Blast radius is broad — multiple resources, applications, and teams are in scope.")
+    if signals.get("blast_radius_size", 0) > 8:
+        reasoning.append("Blast radius is broad — multiple resources, applications, and teams are in scope.")
 
     change_plan = _build_change_plan(risk_level, blind_spots, historical_matches, change_type)
 
@@ -113,57 +109,63 @@ def get_verdict(
     if mock_mode:
         return fallback
 
+    proxy_url = os.getenv("LLM_PROXY_URL", "http://localhost:6655")
+    api_key = os.getenv("LLM_PROXY_API_KEY", "")
+    model = os.getenv("LLM_PROXY_MODEL", "claude-sonnet-4-5")
+
+    prompt_data = {
+        "change": change_request,
+        "blast_radius": blast_radius,
+        "top_affected_nodes": affected_nodes[:8],
+        "blind_spots": blind_spots,
+        "historical_matches": historical_matches[:3],
+        "risk": risk,
+    }
+
+    system_prompt = (
+        "You are an AWS change-risk analyst. "
+        "Reason ONLY over the provided graph data and signals. "
+        "Do NOT invent dependencies or resources not listed. "
+        "Be specific and actionable. "
+        "Return valid JSON matching the output schema."
+    )
+
+    user_prompt = (
+        "Analyze this AWS change and return a JSON object with keys: "
+        "verdict (string, 1-2 sentences), reasoning (array of strings, 3-5 items), "
+        "recommendation (string, specific action), change_plan (array of strings, ordered steps). "
+        f"Data: {json.dumps(prompt_data)}"
+    )
+
+    path = os.getenv("LLM_PROXY_PATH", "/anthropic/v1/messages")
+
+    payload = json.dumps({
+        "model": model,
+        "max_tokens": 1024,
+        "system": system_prompt,
+        "messages": [{"role": "user", "content": user_prompt}],
+    }).encode()
+
+    req = urllib.request.Request(
+        f"{proxy_url}{path}",
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+            "anthropic-version": "2023-06-01",
+        },
+        method="POST",
+    )
+
     try:
-        import boto3
-
-        client = boto3.client("bedrock-runtime", region_name=os.getenv("BEDROCK_REGION", "us-east-1"))
-
-        prompt_data = {
-            "change": change_request,
-            "blast_radius": blast_radius,
-            "top_affected_nodes": affected_nodes[:8],
-            "blind_spots": blind_spots,
-            "historical_matches": historical_matches[:3],
-            "risk": risk,
-        }
-
-        system_prompt = (
-            "You are an AWS change-risk analyst. "
-            "Reason ONLY over the provided graph data and signals. "
-            "Do NOT invent dependencies or resources not listed. "
-            "Be specific and actionable. "
-            "Return valid JSON matching the output schema."
-        )
-
-        user_prompt = (
-            f"Analyze this AWS change and return a JSON object with keys: "
-            f"verdict (string, 1-2 sentences), reasoning (array of strings, 3-5 items), "
-            f"recommendation (string, specific action), change_plan (array of strings, ordered steps). "
-            f"Data: {json.dumps(prompt_data)}"
-        )
-
-        body = json.dumps({
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 1024,
-            "system": system_prompt,
-            "messages": [{"role": "user", "content": user_prompt}],
-        })
-
-        response = client.invoke_model(
-            modelId=os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0"),
-            body=body,
-            contentType="application/json",
-            accept="application/json",
-        )
-
-        result_body = json.loads(response["body"].read())
-        text = result_body["content"][0]["text"]
-        # Extract JSON from response
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            body = json.loads(resp.read())
+        text = body["content"][0]["text"]
         start = text.find("{")
         end = text.rfind("}") + 1
         if start >= 0 and end > start:
             return json.loads(text[start:end])
         return fallback
-
-    except Exception:
+    except Exception as e:
+        print("LLM PROXY ERROR:", e)
         return fallback

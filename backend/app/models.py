@@ -17,6 +17,13 @@ class BlastRadiusSummary(BaseModel):
     customer_facing: bool
 
 
+class CostDelta(BaseModel):
+    monthly_delta_usd: float
+    driver: str
+    baseline_usd: float
+    confidence: float
+
+
 class AffectedNode(BaseModel):
     node_id: str
     name: str
@@ -25,6 +32,7 @@ class AffectedNode(BaseModel):
     criticality: str
     hop_distance: int
     path: list[str]
+    cost_delta: Optional[CostDelta] = None
 
 
 class BlindSpot(BaseModel):

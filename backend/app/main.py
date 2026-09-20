@@ -10,6 +10,7 @@ from .blind_spot import detect_all_blind_spots, detect_blind_spots_for_target
 from .risk_scorer import score as compute_score
 from .incident_matcher import match as match_incidents
 from .bedrock_client import get_verdict
+from .cost_estimator import estimate_cost_deltas
 from .models import (
     ChangeRequest, AnalysisResult, GraphResponse,
     BlastRadiusSummary, AffectedNode, BlindSpot, HistoricalMatch, RiskResult,
@@ -75,7 +76,14 @@ def analyze_change(req: ChangeRequest):
     # Blast radius
     br_result = compute_blast_radius(_graph, req.target, hops=3)
     br_summary = BlastRadiusSummary(**br_result["blast_radius"])
-    affected_nodes = [AffectedNode(**n) for n in br_result["affected_nodes"]]
+    raw_affected = estimate_cost_deltas(
+        _ds.get_costs(),
+        br_result["affected_nodes"],
+        req.change_type,
+        req.before,
+        req.after,
+    )
+    affected_nodes = [AffectedNode(**n) for n in raw_affected]
 
     # Blind spots scoped to this target + its blast radius
     affected_ids = {n.node_id for n in affected_nodes} | {req.target}
